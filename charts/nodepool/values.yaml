@@ -1,0 +1,14 @@
+---
+builder:
+  enabled: true
+  replicas: 1
+
+launcher:
+  enabled: true
+  replicas: 1
+
+config:
+  webapp:
+    port: 8005
+    listen_address: 0.0.0.0
+  images-dir: /opt/nodepool

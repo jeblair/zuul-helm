@@ -1,0 +1,43 @@
+---
+{{ if .Values.launcher.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ include "nodepool.fullname" . }}-launcher
+  labels:
+{{- include "nodepool.launcher.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.launcher.replicas }}
+  selector:
+    matchLabels:
+{{- include "nodepool.launcher.labels" . | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{- include "nodepool.launcher.labels" . | indent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    spec:
+      containers:
+      - name: launcher
+        image: zuul/nodepool-launcher:latest
+        env:
+        - name: OS_CLIENT_CONFIG_FILE
+          value: /etc/nodepool/clouds.yaml
+        volumeMounts:
+        - name: nodepool-config
+          mountPath: /etc/nodepool
+      volumes:
+      - name: nodepool-config
+        secret:
+          secretName: {{ include "nodepool.fullname" . }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+{{ end }}

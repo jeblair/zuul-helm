@@ -1,0 +1,7 @@
+- project:
+    check:
+      jobs:
+        - chart-testing-lint
+    gate:
+      jobs:
+        - chart-testing-lint

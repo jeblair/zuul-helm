@@ -1,0 +1,66 @@
+---
+{{ if .Values.builder.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ include "nodepool.fullname" . }}-builder
+  labels:
+{{- include "nodepool.builder.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.builder.replicas }}
+  serviceName: nodepool-builder
+  selector:
+    matchLabels:
+{{- include "nodepool.builder.labels" . | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{- include "nodepool.builder.labels" . | indent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    spec:
+      containers:
+      - name: launcher
+        image: zuul/nodepool-builder:latest
+        env:
+        - name: OS_CLIENT_CONFIG_FILE
+          value: /etc/nodepool/clouds.yaml
+        volumeMounts:
+        - name: nodepool-config
+          mountPath: /etc/nodepool
+        - name: nodepool-logs
+          mountPath: /var/log/nodepool
+        - name: {{ include "nodepool.fullname" . }}-images-dir
+          mountPath: {{ index .Values.config "images-dir" }}
+        - name: dev
+          mountPath: /dev
+        securityContext:
+          privileged: true
+      volumes:
+      - name: nodepool-config
+        secret:
+          secretName: {{ include "nodepool.fullname" . }}
+      - name: nodepool-logs
+        emptyDir: {}
+      - name: dev
+        hostPath:
+          path: /dev
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ include "nodepool.fullname" . }}-images-dir
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 80G
+{{ end }}
