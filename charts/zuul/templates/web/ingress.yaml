@@ -1,0 +1,27 @@
+---
+{{ if and .Values.ingress.enabled .Values.web.enabled }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ include "zuul.fullname" . }}-web
+  labels:
+{{- include "zuul.web.labels" . | indent 4 }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  rules:
+  - host: {{ .Values.web.host }}
+    http:
+      paths:
+      - backend:
+          serviceName: {{ include "zuul.fullname" . }}-web
+          servicePort: {{ .Values.web.port }}
+        path: /
+  tls:
+  - hosts:
+    - {{ .Values.web.host }}
+    secretName: {{ include "zuul.fullname" . }}-web-certs
+{{ end }}

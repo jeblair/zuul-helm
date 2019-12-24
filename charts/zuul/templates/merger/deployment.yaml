@@ -1,0 +1,44 @@
+---
+{{ if .Values.merger.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ include "zuul.fullname" . }}-merger
+  labels:
+{{- include "zuul.merger.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.merger.replicas }}
+  selector:
+    matchLabels:
+{{- include "zuul.merger.labels" . | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{- include "zuul.merger.labels" . | indent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    spec:
+      containers:
+      - name: merger
+        image: zuul/zuul-merger:latest
+        args:
+        - /usr/local/bin/zuul-merger
+        - -d
+        volumeMounts:
+        - name: zuul-config
+          mountPath: /etc/zuul
+      volumes:
+      - name: zuul-config
+        secret:
+          secretName: {{ include "zuul.fullname" . }}
+          defaultMode: 256
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+{{ end }}

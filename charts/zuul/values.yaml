@@ -1,0 +1,27 @@
+---
+zookeeper:
+  hosts: zookeeper
+
+executor:
+  enabled: true
+  replicas: 3
+
+merger:
+  enabled: true
+  replicas: 3
+
+scheduler:
+  enabled: true
+  gearman:
+    port: 4730
+
+web:
+  enabled: true
+  replicas: 3
+  port: 9000
+
+ingress:
+  enabled: false
+
+tenantConfig: {}
+extraFiles: {}

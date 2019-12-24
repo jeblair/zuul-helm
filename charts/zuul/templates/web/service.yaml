@@ -1,0 +1,19 @@
+---
+{{ if .Values.web.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ include "zuul.fullname" . }}-web
+  labels:
+{{- include "zuul.web.labels" . | indent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+  - name: zuul-web
+    port: {{ .Values.web.port }}
+    protocol: TCP
+    targetPort: zuul-web
+  selector:
+{{- include "zuul.web.labels" . | indent 4 }}
+{{ end }}

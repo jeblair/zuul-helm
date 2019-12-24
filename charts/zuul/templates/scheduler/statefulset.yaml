@@ -1,0 +1,59 @@
+---
+{{ if .Values.scheduler.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ include "zuul.fullname" . }}-scheduler
+  labels:
+{{- include "zuul.scheduler.labels" . | indent 4 }}
+spec:
+  replicas: 1
+  serviceName: zuul-scheduler
+  selector:
+    matchLabels:
+{{- include "zuul.scheduler.labels" . | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{- include "zuul.scheduler.labels" . | indent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    spec:
+      containers:
+      - name: launcher
+        image: zuul/zuul-scheduler:latest
+        args:
+        - /usr/local/bin/zuul-scheduler
+        - -d
+        ports:
+        - name: gearman
+          containerPort: {{ .Values.scheduler.gearman.port }}
+        volumeMounts:
+        - name: zuul-config
+          mountPath: /etc/zuul
+        - name: {{ include "zuul.fullname" . }}-scheduler
+          mountPath: /var/lib/zuul
+      volumes:
+      - name: zuul-config
+        secret:
+          secretName: {{ include "zuul.fullname" . }}
+          defaultMode: 256
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ include "zuul.fullname" . }}-scheduler
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 80Gi
+{{ end }}

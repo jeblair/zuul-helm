@@ -1,0 +1,19 @@
+---
+{{ if .Values.executor.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ include "zuul.fullname" . }}-executor
+  labels:
+{{- include "zuul.executor.labels" . | indent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+  - name: logs
+    port: 7900
+    protocol: TCP
+    targetPort: logs
+  selector:
+{{- include "zuul.executor.labels" . | indent 4 }}
+{{ end }}

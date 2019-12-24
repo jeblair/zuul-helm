@@ -1,0 +1,19 @@
+---
+{{ if .Values.scheduler.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ include "zuul.fullname" . }}-gearman
+  labels:
+{{- include "zuul.scheduler.labels" . | indent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+  - name: gearman
+    port: {{ .Values.scheduler.gearman.port }}
+    protocol: TCP
+    targetPort: gearman
+  selector:
+{{- include "zuul.scheduler.labels" . | indent 4 }}
+{{ end }}
