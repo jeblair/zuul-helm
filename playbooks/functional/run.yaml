@@ -1,0 +1,6 @@
+- hosts: all
+  roles:
+    - role: helm-template
+      vars:
+        helm_release_name: zuul-system
+        helm_chart: ./charts/zuul-system

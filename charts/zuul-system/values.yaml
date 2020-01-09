@@ -1,0 +1,15 @@
+---
+zookeeper:
+  fullnameOverride: zookeeper
+
+nodepool:
+  config:
+    labels: []
+    providers: []
+    diskimages: []
+    zookeeper-servers:
+    - host: zookeeper
+      port: 2181
+
+  clouds: {}
+  extraFiles: {}

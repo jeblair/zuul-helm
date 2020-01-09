@@ -1,7 +1,18 @@
+- job:
+    name: zuul-helm-functional
+    parent: apply-helm-charts
+    run: playbooks/functional/run.yaml
+    vars:
+      minikube_dns_resolvers: ['1.1.1.1', '8.8.8.8']
+      helm_charts:
+        nodepool: ./charts/nodepool
+
 - project:
     check:
       jobs:
         - chart-testing-lint
+        - zuul-helm-functional
     gate:
       jobs:
         - chart-testing-lint
+        - zuul-helm-functional

@@ -4,4 +4,4 @@ name: nodepool
 description: Nodepool is a system for managing test node resources.
 home: https://zuul-ci.org/docs/nodepool/
 appVersion: 3.10.0
-version: 0.0.1
+version: 0.0.0
