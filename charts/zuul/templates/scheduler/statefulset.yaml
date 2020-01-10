@@ -34,11 +34,20 @@ spec:
           mountPath: /etc/zuul
         - name: {{ include "zuul.fullname" . }}-scheduler
           mountPath: /var/lib/zuul
+{{- if .Values.scheduler.tenantConfigSecret }}
+        - name: zuul-tenant-config
+          mountPath: /etc/zuul/tenant
+{{- end }}
       volumes:
       - name: zuul-config
         secret:
           secretName: {{ include "zuul.fullname" . }}
           defaultMode: 256
+{{- if .Values.scheduler.tenantConfigSecret }}
+      - name: zuul-tenant-config
+        secret:
+          secretName: {{ .Values.scheduler.tenantConfigSecret }}
+{{- end }}
     {{- with .Values.tolerations }}
       tolerations:
 {{ toYaml . | indent 8 }}
