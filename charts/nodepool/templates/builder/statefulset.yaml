@@ -40,7 +40,7 @@ spec:
       volumes:
       - name: nodepool-config
         secret:
-          secretName: {{ include "nodepool.fullname" . }}
+          secretName: {{ (empty .Values.config.secret) | ternary (include "nodepool.fullname" .) .Values.config.secret  }}
       - name: nodepool-logs
         emptyDir: {}
       - name: dev
