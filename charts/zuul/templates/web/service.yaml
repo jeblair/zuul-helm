@@ -8,7 +8,7 @@ metadata:
   labels:
 {{- include "zuul.web.labels" . | indent 4 }}
 spec:
-  type: ClusterIP
+  type: NodePort
   ports:
   - name: zuul-web
     port: {{ .Values.web.port }}
